@@ -53,7 +53,10 @@ function init() {
     const page = ctx.newWebview({
       slot: "screen",
       fullWidth: true,
-      autoHeight: true,
+      // A screen-tall frame that scrolls itself, rather than one sized to fit
+      // its content: in a frame with nothing to scroll, Chrome's middle-click
+      // autoscroll gets stuck and the wheel stops working until the next click.
+      height: "100vh",
       sidebar: { label: "Backlog", icon: B.ICON },
     })
 
@@ -710,7 +713,7 @@ function createBacklog() {
     --yellow: #e6b422; --green: #3fbf6a; --blue: #5b8def; --red: #ff8a8a; --gem: #4fd1c5;
   }
   * { box-sizing: border-box; }
-  html { background: var(--bg); color-scheme: dark; }
+  html { background: var(--bg); color-scheme: dark; scrollbar-width: thin; scrollbar-color: #3a3a46 transparent; }
   html, body { margin: 0; color: var(--text); font: 14px/1.4 Inter, "Segoe UI", system-ui, sans-serif; }
   body { position: relative; overflow-x: hidden; }
   .hero { position: absolute; top: 0; left: 0; right: 0; height: 440px; pointer-events: none;
@@ -935,10 +938,6 @@ document.addEventListener("mouseover", function (ev) {
   if (el) showTip(el); else hideTip();
 });
 document.addEventListener("scroll", hideTip, true);
-// A middle click starts Chrome's autoscroll, which gets stuck in this frame:
-// Seanime sizes the frame to fit, so there is nothing to scroll inside it,
-// and the wheel stops working until the next click.
-document.addEventListener("mousedown", function (ev) { if (ev.button === 1) ev.preventDefault(); });
 
 // ---------- header ----------
 function renderHead() {
