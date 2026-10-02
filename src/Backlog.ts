@@ -935,6 +935,10 @@ document.addEventListener("mouseover", function (ev) {
   if (el) showTip(el); else hideTip();
 });
 document.addEventListener("scroll", hideTip, true);
+// A middle click starts Chrome's autoscroll, which gets stuck in this frame:
+// Seanime sizes the frame to fit, so there is nothing to scroll inside it,
+// and the wheel stops working until the next click.
+document.addEventListener("mousedown", function (ev) { if (ev.button === 1) ev.preventDefault(); });
 
 // ---------- header ----------
 function renderHead() {
@@ -1034,6 +1038,7 @@ function renderBacklog() {
     var color = v === "keep" ? "var(--green)" : v === "call" ? "var(--yellow)" : "#6b6b76";
     var head = '<div class="group-head"><h2><span class="dot" style="background:' + color + '"></span>' + VERDICT[v] +
       ' <span class="muted">· ' + g.length + '</span></h2><span class="note">' + VERDICT_NOTE[v] + '</span></div>';
+    if (v === "drop" && PREFS.showDrop) head = head.replace("</span></div>", '</span><span class="spacer"></span><button class="small" data-act="hide-drop">Hide</button></div>');
     if (v === "drop" && !PREFS.showDrop) return head + '<button class="more" data-act="show-drop">Show ' + g.length + ' more</button>';
     return head + '<div class="cards">' + g.map(backlogCard).join("") + '</div>';
   }).join("");
@@ -1117,6 +1122,7 @@ document.addEventListener("click", function (ev) {
   else if (act === "rec-sort") setPref({ recSort: v });
   else if (act === "gems") setPref({ gemsOnly: !PREFS.gemsOnly });
   else if (act === "show-drop") setPref({ showDrop: true });
+  else if (act === "hide-drop") setPref({ showDrop: false });
   else if (act === "status") {
     var s = PREFS.statuses.slice(), at = s.indexOf(v);
     if (at >= 0) s.splice(at, 1); else s.push(v);
