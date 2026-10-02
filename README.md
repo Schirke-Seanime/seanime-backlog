@@ -6,7 +6,7 @@
 
 ---
 
-- **Worth continuing** — every show you're behind on, paused or dropped, sorted into *Keep going*, *Your call* and *Let it go*. The verdict weighs the AniList score, how many viewers finish the show and how well it fits your taste; hover it to see why.
+- **Worth continuing** — the shows you left behind (not touched for a month, not still airing), sorted into *Keep going*, *Your call* and *Let it go*. The verdict weighs the AniList score, how many viewers finish the show and how well it fits your taste; hover it to see why.
 - **Episode scores** — the Episodes button shows the per-episode scores from MyAnimeList and whether the show gets better after the episode you stopped at.
 - **Recommended** — shows you haven't seen, from the AniList recommendations for the ones you rated highest, with **hidden gems** (well rated, little known) marked. **+ Plan** adds a show to your Planning list.
 

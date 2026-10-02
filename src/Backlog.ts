@@ -126,6 +126,8 @@ function createBacklog() {
   // Verdict thresholds (0-100).
   const KEEP_GOING = 65
   const YOUR_CALL = 48
+  // Shows you touched more recently than this are still in progress, not left behind.
+  const RECENT_DAYS = 30
   // A hidden gem: rated well, but few people have seen it.
   const GEM_SCORE = 75
   const GEM_POPULARITY = 50000
@@ -396,10 +398,14 @@ function createBacklog() {
     return a[Math.floor(a.length / 2)]
   }
 
-  // The shows you're behind on or dropped, each with a verdict: 40% its
-  // AniList score, 25% how many viewers finish it, 35% your taste.
+  // The shows you left behind, each with a verdict: 40% its AniList score,
+  // 25% how many viewers finish it, 35% your taste. Shows still airing and
+  // ones you touched in the last month aren't left behind yet: they're only
+  // counted, so the page can say why they're missing.
   function buildBacklog(list: any, shows: { [id: string]: Show }): any {
     const items: any[] = []
+    const hidden = { airing: 0, recent: 0 }
+    const recentSince = Date.now() / 1000 - RECENT_DAYS * 86400
     for (const e of (list.entries as ListEntry[])) {
       if (!BACKLOG_STATUSES[e.status]) continue
       const s = shows[String(e.id)]
@@ -407,6 +413,8 @@ function createBacklog() {
       const available = s.aired || s.episodes
       // Caught up with an airing show: nothing to decide, just waiting.
       if (available && e.progress >= available) continue
+      if (s.status === "RELEASING") { hidden.airing++; continue }
+      if (e.updatedAt > recentSince) { hidden.recent++; continue }
       const info = finishInfo(s)
       const match = matchOf(s, list.affinity)
       const q = quality(s)
@@ -433,6 +441,7 @@ function createBacklog() {
       median(items.filter((i) => i.finish && i.finish.kind === kind && i.finish.sequel === sequel).map((i) => i.finish.rate))
     return {
       items,
+      hidden,
       typical: { finish: typical("finish", false), finishSeq: typical("finish", true), drop: typical("drop", false), dropSeq: typical("drop", true) },
     }
   }
@@ -675,6 +684,7 @@ function createBacklog() {
     return {
       backlog: backlog.items,
       typical: backlog.typical,
+      hidden: backlog.hidden,
       recs,
       eps,
       planned: {},
@@ -930,7 +940,7 @@ document.addEventListener("scroll", hideTip, true);
 function renderHead() {
   var b = DATA.backlog || [];
   var keep = b.filter(function (i) { return i.verdict === "keep"; }).length;
-  var sub = DATA.backlog ? b.length + " unfinished · " + keep + " worth continuing" : "";
+  var sub = DATA.backlog ? b.length + " left behind · " + keep + " worth continuing" : "";
   if (DATA.updatedAt) sub += (sub ? " · " : "") + "updated " + ago(DATA.updatedAt / 1000).replace("today", "just now");
   var tabs = [["backlog", "Worth continuing"], ["recs", "Recommended"]].map(function (t) {
     return '<button data-act="tab" data-v="' + t[0] + '" class="' + (PREFS.tab === t[0] ? "on" : "") + '">' + t[1] + '</button>';
@@ -1013,7 +1023,7 @@ function backlogCard(i) {
 }
 function renderBacklog() {
   var items = backlogItems();
-  var sorts = seg("sort", PREFS.sort, [["best", "Best bets"], ["almost", "Almost done"], ["short", "Least time"], ["recent", "Recent"]]);
+  var sorts = seg("sort", PREFS.sort, [["best", "Best bets"], ["almost", "Almost done"], ["short", "Least time"], ["recent", "Recently left"]]);
   var chips = [["CURRENT", "Watching"], ["PAUSED", "Paused"], ["DROPPED", "Dropped"]].map(function (s) {
     var n = (DATA.backlog || []).filter(function (i) { return i.listStatus === s[0]; }).length;
     return '<button class="chip-btn' + (PREFS.statuses.indexOf(s[0]) >= 0 ? " on" : "") + '" data-act="status" data-v="' + s[0] + '">' + s[1] + ' · ' + n + '</button>';
@@ -1028,7 +1038,14 @@ function renderBacklog() {
     return head + '<div class="cards">' + g.map(backlogCard).join("") + '</div>';
   }).join("");
   return '<section><div class="row" style="margin-bottom:6px">' + chips + '<span class="spacer"></span>' + sorts + '</div>' +
-    (items.length ? groups : '<div class="empty">' + (DATA.backlog && DATA.backlog.length ? "Nothing matches the filters." : "Nothing unfinished — you're all caught up.") + '</div>') + '</section>';
+    (items.length ? groups : '<div class="empty">' + (DATA.backlog && DATA.backlog.length ? "Nothing matches the filters." : "Nothing left behind — everything unfinished is airing or was watched in the last month.") + '</div>') + hiddenNote() + '</section>';
+}
+// What the tab leaves out on purpose, so the count adds up.
+function hiddenNote() {
+  var h = DATA.hidden || {}, parts = [];
+  if (h.airing) parts.push(h.airing + " still airing");
+  if (h.recent) parts.push(h.recent + " watched in the last month");
+  return parts.length ? '<div class="note" style="margin-top:14px">Not shown: ' + parts.join(" and ") + ".</div>" : "";
 }
 
 // ---------- recommended ----------
