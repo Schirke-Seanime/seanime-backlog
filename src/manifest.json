@@ -1,0 +1,34 @@
+{
+  "id": "backlog",
+  "name": "Backlog",
+  "version": "1.0.0",
+  "manifestURI": "https://raw.githubusercontent.com/Schirke/seanime-backlog/main/src/manifest.json",
+  "language": "typescript",
+  "type": "plugin",
+  "description": "Is it worth going back to the shows you left unfinished? A verdict for each, episode scores on demand, and recommendations with hidden gems.",
+  "author": "Schirke",
+  "icon": "https://raw.githubusercontent.com/Schirke/seanime-backlog/main/src/icon.png",
+  "website": "https://github.com/Schirke/seanime-backlog",
+  "lang": "en",
+  "payloadURI": "https://raw.githubusercontent.com/Schirke/seanime-backlog/main/src/Backlog.ts",
+  "plugin": {
+    "version": "1",
+    "permissions": {
+      "scopes": [
+        "anilist",
+        "anilist-token",
+        "database",
+        "storage"
+      ],
+      "allow": {
+        "networkAccess": {
+          "allowedDomains": [
+            "graphql.anilist.co",
+            "myanimelist.net",
+            "api.jikan.moe"
+          ]
+        }
+      }
+    }
+  }
+}
