@@ -15,7 +15,7 @@
 In Seanime, open **Extensions** → **Add extension**, paste the manifest URL and allow the requested permissions:
 
 ```
-https://raw.githubusercontent.com/Schirke/seanime-backlog/main/src/manifest.json
+https://raw.githubusercontent.com/Schirke-Seanime/seanime-backlog/main/src/manifest.json
 ```
 
 The **Backlog** page appears in the sidebar.
